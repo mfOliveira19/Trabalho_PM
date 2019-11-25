@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Contacts List</string>
+    <string name="add">Add Contact</string>
+    <string name="nome">Name*</string>
+    <string name="apelido">Surname*</string>
+    <string name="numero">Number*</string>
+    <string name="cancelar">Cancel</string>
+    <string name="editar">Edit</string>
+    <string name="remover">Remove</string>
+    <string name="certeza">Are you sure you want to remove this contact ?</string>
+    <string name="confirmar">Confirm</string>
+    <string name="ver">Contact Detail</string>
+    <string name="voltar">Return</string>
+    <string name="editarcontacto">Edit Contact</string>
+    <string name="morada">Address*</string>
+    <string name="idade">Age*</string>
+    <string name="alertapreenche">Fill all the fields</string>
+    <string name="user">User</string>
+    <string name="registar">Register</string>
+    <string name="preencheloginuser">Fill the username field</string>
+    <string name="preencheloginpass">Fill the password field</string>
+    <string name="confirmarpassword">Confirm Password</string>
+    <string name="introduzapassword">Enter the password again</string>
+    <string name="loginerro">Wrong username or password</string>
+    <string name="lembraruser">Remember User</string>
+    <string name="confirmalogout">Are a you sure you want to Logout ?</string>
+    <string name="usernamelong">Username too long</string>
+    <string name="passinvalida">The password must contain 1 number, 1 lower case letter, and 6 characters</string>
+    <string name="emailinvalido">Enter a valid email</string>
+    <string name="userexiste">Username already exists</string>
+    <string name="ordenacriacao">Order by creation</string>
+    <string name="ordernaridade">Order by age</string>
+    <string name="ordenanome">Order by name</string>
+    <string name="confirmapassworderro">Password doesn\'t match</string>
+</resources>

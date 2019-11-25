@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".AddActivity">
+
+<RelativeLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/firstLayout">
+
+    <ImageView
+        android:id="@+id/img"
+        android:layout_width="84dp"
+        android:layout_height="83dp"
+        android:layout_marginTop="20dp"
+        android:src="@mipmap/ic_user" />
+
+
+    <EditText
+        android:id="@+id/edit_nome"
+        android:digits="abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:hint="@string/nome"
+        android:layout_toRightOf="@id/img"/>
+
+    <EditText
+        android:id="@+id/edit_apelido"
+        android:digits="abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:hint="@string/apelido"
+        android:layout_below="@id/edit_nome"
+        android:layout_toRightOf="@id/img"/>
+
+</RelativeLayout>
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginTop="20dp"
+    android:layout_below="@id/firstLayout">
+
+    <EditText
+        android:id="@+id/edit_numero"
+        android:inputType="phone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/numero"/>
+
+    <EditText
+        android:id="@+id/edit_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Email*"/>
+
+    <EditText
+        android:id="@+id/edit_morada"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/morada"/>
+
+    <EditText
+        android:id="@+id/edit_idade"
+        android:inputType="number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/idade"/>
+
+    </LinearLayout>
+</RelativeLayout>
