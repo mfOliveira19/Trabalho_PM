@@ -14,6 +14,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,6 +31,11 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.listadecontactos.Utils.Utils;
 import com.example.listadecontactos.adapters.CustomArrayAdapter;
 import com.example.listadecontactos.adapters.MyCursorAdapter;
@@ -37,59 +43,204 @@ import com.example.listadecontactos.db.Contrato;
 import com.example.listadecontactos.db.DB;
 import com.example.listadecontactos.entities.Contacto;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
-    private SensorManager mSensorManager;
-    private Sensor mProximity;
-    private static final int SENSOR_SENSITIVITY = 4;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class MainActivity extends AppCompatActivity {
+    //private SensorManager mSensorManager;
+    //private Sensor mProximity;
+    //private static final int SENSOR_SENSITIVITY = 4;
     private int REQUEST_CODE_OP_1 = 1;
     private int REQUEST_CODE_OP_2 = 2;
-    DB mDbHelper;
-    SQLiteDatabase db;
+    // DB mDbHelper;
+    //SQLiteDatabase db;
     ListView lista;
-    Cursor c, c_contactos;
-    MyCursorAdapter madapter;
+    //Cursor c, c_contactos;
+    //MyCursorAdapter madapter;
     Spinner spin;
     int iduser;
     EditText pnome;
-
+    String prefix_url = "https://inactive-mosses.000webhostapp.com/myslim/api/";
+    ArrayList<Contacto> arrayContacto = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         iduser = getIntent().getIntExtra("ID", -1);
-        //Toast.makeText(MainActivity.this, "" + iduser, Toast.LENGTH_SHORT).show();
-        mDbHelper = new DB(this);
-        db = mDbHelper.getReadableDatabase();
+        //adToast.makeText(MainActivity.this, "" + iduser, Toast.LENGTH_SHORT).show();
+        //mDbHelper = new DB(this);
+        //db = mDbHelper.getReadableDatabase();
         lista = (ListView)findViewById(R.id.lista);
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        mProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        preencheLista();
+        //mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        //mProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        //preencheLista();
         registerForContextMenu(lista);
         spin = ((Spinner)findViewById(R.id.spinner));
+        //arrayContacto.add(new Contacto("Teste", "Teste", 6969696, "teste@teste.pt", "Rua", 22, iduser));
+        //fillLista();
         lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Intent intent = new Intent(MainActivity.this, VerActivity.class);
+                // arrayContacto.add(new Contacto("Teste", "Teste", 6969696, "teste@teste.pt", "Rua", 22));
+                Toast.makeText(MainActivity.this, "" + position, Toast.LENGTH_SHORT).show();
+                intent.putExtra(Utils.PARAM_NOME, arrayContacto.get(position).nome);
+                intent.putExtra(Utils.PARAM_APELIDO, arrayContacto.get(position).apelido);
+                intent.putExtra(Utils.PARAM_NUMERO, arrayContacto.get(position).numero);
+                intent.putExtra(Utils.PARAM_EMAIL, arrayContacto.get(position).email);
+                intent.putExtra(Utils.PARAM_MORADA, arrayContacto.get(position).morada);
+                intent.putExtra(Utils.PARAM_IDADE, arrayContacto.get(position).idade);
 
-                c.moveToPosition(i);
-                intent.putExtra(Utils.PARAM_NOME, c.getString(c.getColumnIndex(Contrato.Contacto.COLUMN_NOME)));
-                intent.putExtra(Utils.PARAM_APELIDO, c.getString(c.getColumnIndex(Contrato.Contacto.COLUMN_APELIDO)));
-                intent.putExtra(Utils.PARAM_NUMERO, c.getInt(c.getColumnIndex(Contrato.Contacto.COLUMN_NUMERO)));
-                intent.putExtra(Utils.PARAM_EMAIL, c.getString(c.getColumnIndex(Contrato.Contacto.COLUMN_EMAIL)));
-                intent.putExtra(Utils.PARAM_MORADA, c.getString(c.getColumnIndex(Contrato.Contacto.COLUMN_MORADA)));
-                intent.putExtra(Utils.PARAM_IDADE, c.getInt(c.getColumnIndex(Contrato.Contacto.COLUMN_IDADE)));
                 startActivity(intent);
             }
 
         });
     }
 
+    private void fillLista() {
+        arrayContacto.removeAll(arrayContacto);
+        String s = String.valueOf(iduser);
 
-    public final void onAccuracyChanged(Sensor sensor, int accuracy) {
+        String url = prefix_url + "contactos/" + s;
+        //Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    JSONArray arr = response.getJSONArray(Utils.PARAM_DADOS);
+                    // arrayContacto.clear();
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject obj = arr.getJSONObject(i);
+                        //Toast.makeText(MainActivity.this, obj.getString("nome"), Toast.LENGTH_SHORT).show()
+                        arrayContacto.add(new Contacto(obj.getString("nome"), obj.getString("apelido"),obj.getInt("numero"), obj.getString("email"), obj.getString("morada"), obj.getInt("idade"), iduser));
+
+                        CustomArrayAdapter itemsAdapter =
+                                new CustomArrayAdapter(MainActivity.this, arrayContacto);
+                        ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);
+
+                    }
+                } catch (JSONException ex) {
+                    Log.d("fillLista", "" + ex);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public  void onErrorResponse(VolleyError error) {
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+        MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
+
+
+
+       /* ArrayList<Contacto> arrayContacto = new ArrayList<>();
+        arrayContacto.add(new Contacto("Miguel", "Oliveira", 966400474, "teste@teste.pt", "Rua", 20));
+        CustomArrayAdapter itemsAdapter =
+                new CustomArrayAdapter(this, arrayContacto);
+        ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);*/
+    }
+
+
+
+    private void fillListaOrdernome() {
+        arrayContacto.removeAll(arrayContacto);
+        String s = String.valueOf(iduser);
+
+        String url = prefix_url + "contactos/ordernome/" + s;
+        //Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    JSONArray arr = response.getJSONArray(Utils.PARAM_DADOS);
+                    // arrayContacto.clear();
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject obj = arr.getJSONObject(i);
+                        //Toast.makeText(MainActivity.this, obj.getString("nome"), Toast.LENGTH_SHORT).show()
+                        arrayContacto.add(new Contacto(obj.getString("nome"), obj.getString("apelido"),obj.getInt("numero"), obj.getString("email"), obj.getString("morada"), obj.getInt("idade"), iduser));
+
+                        CustomArrayAdapter itemsAdapter =
+                                new CustomArrayAdapter(MainActivity.this, arrayContacto);
+                        ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);
+
+                    }
+                } catch (JSONException ex) {
+                    Log.d("fillLista", "" + ex);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public  void onErrorResponse(VolleyError error) {
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+        MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
+
+
+
+       /* ArrayList<Contacto> arrayContacto = new ArrayList<>();
+        arrayContacto.add(new Contacto("Miguel", "Oliveira", 966400474, "teste@teste.pt", "Rua", 20));
+        CustomArrayAdapter itemsAdapter =
+                new CustomArrayAdapter(this, arrayContacto);
+        ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);*/
+    }
+
+    private void fillListaOrderidade() {
+        arrayContacto.removeAll(arrayContacto);
+        String s = String.valueOf(iduser);
+
+        String url = prefix_url + "contactos/orderidade/" + s;
+        //Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    JSONArray arr = response.getJSONArray(Utils.PARAM_DADOS);
+                    // arrayContacto.clear();
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject obj = arr.getJSONObject(i);
+                        //Toast.makeText(MainActivity.this, obj.getString("nome"), Toast.LENGTH_SHORT).show()
+                        arrayContacto.add(new Contacto(obj.getString("nome"), obj.getString("apelido"),obj.getInt("numero"), obj.getString("email"), obj.getString("morada"), obj.getInt("idade"), iduser));
+
+                        CustomArrayAdapter itemsAdapter =
+                                new CustomArrayAdapter(MainActivity.this, arrayContacto);
+                        ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);
+
+                    }
+                } catch (JSONException ex) {
+                    Log.d("fillLista", "" + ex);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public  void onErrorResponse(VolleyError error) {
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+        MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
+
+
+
+       /* ArrayList<Contacto> arrayContacto = new ArrayList<>();
+        arrayContacto.add(new Contacto("Miguel", "Oliveira", 966400474, "teste@teste.pt", "Rua", 20));
+        CustomArrayAdapter itemsAdapter =
+                new CustomArrayAdapter(this, arrayContacto);
+        ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);*/
+    }
+
+
+
+    /*public final void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
 
@@ -108,21 +259,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
 
         }
-    }
+    }*/
 
 
     protected void onResume() {
         super.onResume();
-        mSensorManager.registerListener(this, mProximity,  SensorManager.SENSOR_DELAY_NORMAL);
+        //fillLista();
+
     }
 
     protected void onPause() {
         super.onPause();
-        mSensorManager.unregisterListener(this);
+
     }
 
 
-    private void getCursorPesquisaNome(String nomep) {
+  /*  private void getCursorPesquisaNome(String nomep) {
         String sql = "select " + Contrato.Contacto.TABLE_NAME + "." +
                 Contrato.Contacto._ID + "," +
                 Contrato.Contacto.COLUMN_NOME + "," +
@@ -241,7 +393,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void deleteFromBD(int id) {
         db.delete(Contrato.Contacto.TABLE_NAME, Contrato.Contacto._ID + " = ?", new String[]{id+""});
         preencheLista();
-    }
+    }*/
 
 
 
@@ -264,17 +416,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 if(position == 0) {
                     //Toast.makeText(MainActivity.this, selectedItem, Toast.LENGTH_SHORT).show();
-                    preencheLista();
+                    //preencheLista();
+                    fillLista();
                 }
 
                 if(position == 1) {
                     //Toast.makeText(MainActivity.this, selectedItem, Toast.LENGTH_SHORT).show();
-                    preencheListaOrdenaNome();
+                    //preencheListaOrdenaNome();
+                    fillListaOrdernome();
                 }
 
                 if(position == 2) {
                     //Toast.makeText(MainActivity.this, selectedItem, Toast.LENGTH_SHORT).show();
-                    preencheListaOrdenaIdade();
+                    //preencheListaOrdenaIdade();
+                    fillListaOrderidade();
                 }
 
             }
@@ -289,7 +444,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     @Override
-     public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {
         Context mContext = this;
         switch(item.getItemId()) {
             case R.id.add:
@@ -331,7 +486,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 if(!pnome.getText().toString().isEmpty()) {
-                                    preencheListaPesquisaNome(pnome.getText().toString());
+                                    //preencheListaPesquisaNome(pnome.getText().toString());
                                 }
                             }
                         });
@@ -346,7 +501,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 return true;
 
             case R.id.refresh:
-                preencheLista();
+                //preencheLista();
                 return true;
 
             default:
@@ -360,7 +515,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             if (resultCode == RESULT_OK) {
 
-                ContentValues cv = new ContentValues();
+               /* ContentValues cv = new ContentValues();
                 cv.put(Contrato.Contacto.COLUMN_NOME, data.getStringExtra(Utils.PARAM_NOME));
                 cv.put(Contrato.Contacto.COLUMN_APELIDO, data.getStringExtra(Utils.PARAM_APELIDO));
                 cv.put(Contrato.Contacto.COLUMN_NUMERO, data.getIntExtra(Utils.PARAM_NUMERO, -1));
@@ -369,14 +524,59 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 cv.put(Contrato.Contacto.COLUMN_IDADE, data.getIntExtra(Utils.PARAM_IDADE, -1));
                 cv.put(Contrato.Contacto.COLUMN_ID_USER, iduser);
                 db.insert(Contrato.Contacto.TABLE_NAME, null, cv);
-                preencheLista();
+                preencheLista();*/
+                arrayContacto.add(new Contacto(data.getStringExtra(Utils.PARAM_NOME), data.getStringExtra(Utils.PARAM_APELIDO),data.getIntExtra(Utils.PARAM_NUMERO, -1), data.getStringExtra(Utils.PARAM_EMAIL), data.getStringExtra(Utils.PARAM_MORADA), data.getIntExtra(Utils.PARAM_IDADE, -1), iduser));
+
+                String url = "https://inactive-mosses.000webhostapp.com/myslim/api/contactos";
+
+                Map<String, String> jsonParams = new HashMap<String, String>();
+                jsonParams.put("nome", data.getStringExtra(Utils.PARAM_NOME));
+                jsonParams.put("apelido", data.getStringExtra(Utils.PARAM_APELIDO));
+                jsonParams.put("numero", String.valueOf(data.getIntExtra(Utils.PARAM_NUMERO, -1)));
+                jsonParams.put("email", data.getStringExtra(Utils.PARAM_EMAIL));
+                jsonParams.put("morada", data.getStringExtra(Utils.PARAM_MORADA));
+                jsonParams.put("idade", String.valueOf(data.getIntExtra(Utils.PARAM_IDADE, -1)));
+                jsonParams.put("user_id", String.valueOf(iduser));
+                JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
+
+                        new JSONObject(jsonParams),
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    if (response.getBoolean("status")) {
+                                        // Toast.makeText(LoginActivity.this,response.getString("MSG") , Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        // Toast.makeText(LoginActivity.this,response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                    }
+                                } catch (JSONException ex) {
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        }) {
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        HashMap<String, String> headers = new HashMap<String, String>();
+                        headers.put("Content-Type", "application/json; charset=utf-8");
+                        headers.put("User-agent", System.getProperty("http.agent"));
+                        return headers;
+                    }
+                };
+
+                MySingleton.getInstance(this).addToRequestQueue(postRequest);
+                //fillLista();
             }
         }
 
         if (requestCode == REQUEST_CODE_OP_2) {
 
             if (resultCode == RESULT_OK) {
-                ContentValues cv = new ContentValues();
+              /*  ContentValues cv = new ContentValues();
                 cv.put(Contrato.Contacto.COLUMN_NOME, data.getStringExtra(Utils.PARAM_NOME));
                 cv.put(Contrato.Contacto.COLUMN_APELIDO, data.getStringExtra(Utils.PARAM_APELIDO));
                 cv.put(Contrato.Contacto.COLUMN_NUMERO, data.getIntExtra(Utils.PARAM_NUMERO, -1));
@@ -386,7 +586,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 cv.put(Contrato.Contacto.COLUMN_ID_USER, iduser);
                 int id = data.getIntExtra(Utils.PARAM_INDEX, -1);
                 db.update(Contrato.Contacto.TABLE_NAME, cv, Contrato.Contacto._ID + " = ?", new String[]{id+""});
-                preencheLista();
+                preencheLista();*/
             }
 
         }
@@ -407,7 +607,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         switch (item.getItemId()) {
             case R.id.editar:
-                Intent intent = new Intent(MainActivity.this, EditActivity.class);
+             /*   Intent intent = new Intent(MainActivity.this, EditActivity.class);
                 int itemPosition = info.position;
                 c.moveToPosition(itemPosition);
                 int id_contacto = c.getInt(c.getColumnIndex(Contrato.Contacto._ID));
@@ -418,7 +618,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 intent.putExtra(Utils.PARAM_MORADA, c.getString(c.getColumnIndex(Contrato.Contacto.COLUMN_MORADA)));
                 intent.putExtra(Utils.PARAM_IDADE, c.getInt(c.getColumnIndex(Contrato.Contacto.COLUMN_IDADE)));
                 intent.putExtra(Utils.PARAM_INDEX, id_contacto);
-                startActivityForResult(intent, REQUEST_CODE_OP_2);
+                startActivityForResult(intent, REQUEST_CODE_OP_2);*/
                 return true;
             case R.id.remover:
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -428,10 +628,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                int itemPosition = info.position;
+                                /*int itemPosition = info.position;
                                 c.moveToPosition(itemPosition);
                                 int id_contacto = c.getInt(c.getColumnIndex(Contrato.Contacto._ID));
-                                deleteFromBD(id_contacto);
+                                deleteFromBD(id_contacto);*/
                             }
                         });
                 builder.setNegativeButton(R.string.cancelar, new DialogInterface.OnClickListener() {
@@ -456,3 +656,5 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
 }
+
+
