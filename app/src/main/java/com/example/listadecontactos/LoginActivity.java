@@ -56,6 +56,8 @@ public class LoginActivity extends AppCompatActivity {
     String id;
     int id_int = -1;
 
+
+    //kjbiubiububiubuibiubiubiu
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -455,7 +457,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
     public void Registar(String username, String password) {
-        String url = prefix_url + "/users";
+        String url = prefix_url + "users";
 
         Map<String, String> jsonParams = new HashMap<String, String>();
         jsonParams.put("username", username);
@@ -467,10 +469,12 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            if (response.getBoolean("status")) {
-                                // Toast.makeText(LoginActivity.this,response.getString("MSG") , Toast.LENGTH_SHORT).show();
+                            boolean status = response.getBoolean("status");
+                            //Toast.makeText(LoginActivity.this,"" + status, Toast.LENGTH_SHORT).show();
+                            if (status) {
+                                //Toast.makeText(LoginActivity.this,response.getString("MSG") , Toast.LENGTH_SHORT).show();
                             } else {
-                                // Toast.makeText(LoginActivity.this,response.getString("MSG"), Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(LoginActivity.this,response.getString("MSG"), Toast.LENGTH_SHORT).show();
                             }
                         } catch (JSONException ex) {
                         }
