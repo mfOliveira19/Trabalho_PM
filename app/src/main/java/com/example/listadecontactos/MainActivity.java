@@ -173,15 +173,24 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     JSONArray arr = response.getJSONArray(Utils.PARAM_DADOS);
                     // arrayContacto.clear();
-                    for (int i = 0; i < arr.length(); i++) {
-                        JSONObject obj = arr.getJSONObject(i);
-                        //Toast.makeText(MainActivity.this, obj.getString("nome"), Toast.LENGTH_SHORT).show()
-                        arrayContacto.add(new Contacto(obj.getInt("id"),obj.getString("nome"), obj.getString("apelido"),obj.getInt("numero"), obj.getString("email"), obj.getString("morada"), obj.getInt("idade"), iduser));
+                    boolean status = response.getBoolean("status");
+                    // Toast.makeText(MainActivity.this, "" + status, Toast.LENGTH_SHORT).show();
+                    if(status == true) {
+                        for (int i = 0; i < arr.length(); i++) {
+                            JSONObject obj = arr.getJSONObject(i);
+                            //Toast.makeText(MainActivity.this, obj.getString("nome"), Toast.LENGTH_SHORT).show()
+                            arrayContacto.add(new Contacto(obj.getInt("id"), obj.getString("nome"), obj.getString("apelido"), obj.getInt("numero"), obj.getString("email"), obj.getString("morada"), obj.getInt("idade"), iduser));
 
-                        CustomArrayAdapter itemsAdapter =
-                                new CustomArrayAdapter(MainActivity.this, arrayContacto);
-                        ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);
+                            CustomArrayAdapter itemsAdapter =
+                                    new CustomArrayAdapter(MainActivity.this, arrayContacto);
+                            ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);
 
+                        }
+                    }
+                    else  {
+                        arrayContacto.removeAll(arrayContacto);
+                        lista.setAdapter(null);
+                        Toast.makeText(MainActivity.this, "LISTA VAZIA", Toast.LENGTH_SHORT).show();
                     }
                 } catch (JSONException ex) {
                     Log.d("fillLista", "" + ex);
@@ -217,15 +226,24 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     JSONArray arr = response.getJSONArray(Utils.PARAM_DADOS);
                     // arrayContacto.clear();
-                    for (int i = 0; i < arr.length(); i++) {
-                        JSONObject obj = arr.getJSONObject(i);
-                        //Toast.makeText(MainActivity.this, obj.getString("nome"), Toast.LENGTH_SHORT).show()
-                        arrayContacto.add(new Contacto(obj.getInt("id"),obj.getString("nome"), obj.getString("apelido"),obj.getInt("numero"), obj.getString("email"), obj.getString("morada"), obj.getInt("idade"), iduser));
+                    boolean status = response.getBoolean("status");
+                    // Toast.makeText(MainActivity.this, "" + status, Toast.LENGTH_SHORT).show();
+                    if(status == true) {
+                        for (int i = 0; i < arr.length(); i++) {
+                            JSONObject obj = arr.getJSONObject(i);
+                            //Toast.makeText(MainActivity.this, obj.getString("nome"), Toast.LENGTH_SHORT).show()
+                            arrayContacto.add(new Contacto(obj.getInt("id"), obj.getString("nome"), obj.getString("apelido"), obj.getInt("numero"), obj.getString("email"), obj.getString("morada"), obj.getInt("idade"), iduser));
 
-                        CustomArrayAdapter itemsAdapter =
-                                new CustomArrayAdapter(MainActivity.this, arrayContacto);
-                        ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);
+                            CustomArrayAdapter itemsAdapter =
+                                    new CustomArrayAdapter(MainActivity.this, arrayContacto);
+                            ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);
 
+                        }
+                    }
+                    else  {
+                        arrayContacto.removeAll(arrayContacto);
+                        lista.setAdapter(null);
+                        Toast.makeText(MainActivity.this, "LISTA VAZIA", Toast.LENGTH_SHORT).show();
                     }
                 } catch (JSONException ex) {
                     Log.d("fillLista", "" + ex);
@@ -262,15 +280,24 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     JSONArray arr = response.getJSONArray(Utils.PARAM_DADOS);
                     // arrayContacto.clear();
-                    for (int i = 0; i < arr.length(); i++) {
-                        JSONObject obj = arr.getJSONObject(i);
-                        //Toast.makeText(MainActivity.this, obj.getString("nome"), Toast.LENGTH_SHORT).show()
-                        arrayContacto.add(new Contacto(obj.getInt("id"),obj.getString("nome"), obj.getString("apelido"),obj.getInt("numero"), obj.getString("email"), obj.getString("morada"), obj.getInt("idade"), iduser));
+                    boolean status = response.getBoolean("status");
+                    // Toast.makeText(MainActivity.this, "" + status, Toast.LENGTH_SHORT).show();
+                    if(status == true) {
+                        for (int i = 0; i < arr.length(); i++) {
+                            JSONObject obj = arr.getJSONObject(i);
+                            //Toast.makeText(MainActivity.this, obj.getString("nome"), Toast.LENGTH_SHORT).show()
+                            arrayContacto.add(new Contacto(obj.getInt("id"), obj.getString("nome"), obj.getString("apelido"), obj.getInt("numero"), obj.getString("email"), obj.getString("morada"), obj.getInt("idade"), iduser));
 
-                        CustomArrayAdapter itemsAdapter =
-                                new CustomArrayAdapter(MainActivity.this, arrayContacto);
-                        ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);
+                            CustomArrayAdapter itemsAdapter =
+                                    new CustomArrayAdapter(MainActivity.this, arrayContacto);
+                            ((ListView) findViewById(R.id.lista)).setAdapter(itemsAdapter);
 
+                        }
+                    }
+                    else  {
+                        arrayContacto.removeAll(arrayContacto);
+                        lista.setAdapter(null);
+                        Toast.makeText(MainActivity.this, "LISTA VAZIA", Toast.LENGTH_SHORT).show();
                     }
                 } catch (JSONException ex) {
                     Log.d("fillLista", "" + ex);
@@ -594,6 +621,7 @@ public class MainActivity extends AppCompatActivity {
                 jsonParams.put("morada", data.getStringExtra(Utils.PARAM_MORADA));
                 jsonParams.put("idade", String.valueOf(data.getIntExtra(Utils.PARAM_IDADE, -1)));
                 jsonParams.put("user_id", String.valueOf(iduser));
+                fillLista();
                 JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
 
                         new JSONObject(jsonParams),
@@ -626,7 +654,6 @@ public class MainActivity extends AppCompatActivity {
                 };
 
                 MySingleton.getInstance(this).addToRequestQueue(postRequest);
-                fillLista();
             }
         }
 
@@ -645,6 +672,7 @@ public class MainActivity extends AppCompatActivity {
                 db.update(Contrato.Contacto.TABLE_NAME, cv, Contrato.Contacto._ID + " = ?", new String[]{id+""});
                 preencheLista();*/
                 int id = data.getIntExtra(Utils.PARAM_INDEX, -1);
+                //Toast.makeText(MainActivity.this, "" + id, Toast.LENGTH_SHORT).show();
                 String url = "https://inactive-mosses.000webhostapp.com/myslim/api/contactos/editar/" + id;
 
                 Map<String, String> jsonParams = new HashMap<String, String>();
@@ -655,6 +683,7 @@ public class MainActivity extends AppCompatActivity {
                 jsonParams.put("morada", data.getStringExtra(Utils.PARAM_MORADA));
                 jsonParams.put("idade", String.valueOf(data.getIntExtra(Utils.PARAM_IDADE, -1)));
                 jsonParams.put("user_id", String.valueOf(iduser));
+                fillLista();
                 JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
 
                         new JSONObject(jsonParams),
@@ -687,7 +716,6 @@ public class MainActivity extends AppCompatActivity {
                 };
 
                 MySingleton.getInstance(this).addToRequestQueue(postRequest);
-                fillLista();
             }
 
             }
