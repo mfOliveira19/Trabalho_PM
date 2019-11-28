@@ -1,6 +1,7 @@
 package com.example.listadecontactos.entities;
 
 public class Contacto {
+    public int id;
     public String nome;
     public String apelido;
     public int numero;
@@ -9,7 +10,8 @@ public class Contacto {
     public int idade;
     public int id_user;
 
-    public Contacto(String name, String surname, int number, String email, String address, int age, int id_user) {
+    public Contacto(int id, String name, String surname, int number, String email, String address, int age, int id_user) {
+        this.id = id;
         this.nome = name;
         this.apelido = surname;
         this.numero = number;
@@ -19,6 +21,10 @@ public class Contacto {
         this.id_user = id_user;
 
     }
+
+    public int getId() { return id;}
+
+    public void setId(int id) { this.id = id; }
 
     public String getNome() {
         return nome;

@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -140,6 +141,7 @@ public class LoginActivity extends AppCompatActivity {
                 else {
                     // String teste = Login(username, password);
                     // Toast.makeText(LoginActivity.this, teste, Toast.LENGTH_SHORT).show();
+                    //Login(username, password);
                     Login(username, password);
                     managePrefs();
                 }
@@ -236,7 +238,7 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    private void Login(String username, String password) {
+   /* private void Login(String username, String password) {
 
         String url = prefix_url + "users/" + username + "/" + password;
 
@@ -299,11 +301,161 @@ public class LoginActivity extends AppCompatActivity {
                 });
         MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
         //Toast.makeText(LoginActivity.this, "" + id, Toast.LENGTH_SHORT).show();
-    }
+    }*/
+
+
+
+   public void getIDUser (String username) {
+       String url = prefix_url + "users/" + username;
+
+       JsonObjectRequest jsObjRequest = new JsonObjectRequest
+               (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+                   @Override
+                   public void onResponse(JSONObject response) {
+                       try {
+                           boolean status = response.getBoolean("status");
+                           if(status) {
+                              // Toast.makeText(LoginActivity.this, ""+ status, Toast.LENGTH_SHORT).show();
+                               //id = response.optString("id");
+
+                               JSONObject obj = response.getJSONObject(("DATA"));
+                               id = obj.optString("id");
+                               //Toast.makeText(LoginActivity.this, "" + id, Toast.LENGTH_SHORT).show();
+                               id_int = Integer.parseInt(id);
+                               Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                               intent.putExtra("ID", id_int);
+                               managePrefs();
+                               startActivity(intent);
+
+                           }
+
+                           else {
+                              /* AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                               builder.setCancelable(true);
+                               builder.setMessage("User não existe");
+                               builder.setPositiveButton("OK",
+                                       new DialogInterface.OnClickListener() {
+                                           @Override
+                                           public void onClick(DialogInterface dialog, int which) {
+                                           }
+                                       });
+
+
+                               AlertDialog dialog = builder.create();
+                               dialog.show();*/
+
+
+
+
+                               Toast.makeText(LoginActivity.this, "" + status, Toast.LENGTH_SHORT).show();
+                               id = null;
+                           }
+                       }
+                       catch (JSONException ex) {
+                           Log.d("login", "" + ex);
+                       }
+
+                   }
+
+               }, new Response.ErrorListener() {
+                   @Override
+                   public void onErrorResponse(VolleyError error) {
+                       Toast.makeText(LoginActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                   }
+               });
+       MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
+       //Toast.makeText(LoginActivity.this, "" + id, Toast.LENGTH_SHORT).show();
+   }
+
+
+
+
+   public void Login(final String username, String password) {
+
+       String url = prefix_url + "users/login";
+       Map<String, String> jsonParams = new HashMap<String, String>();
+
+       jsonParams.put("username", username);
+       jsonParams.put("password", password);
+
+       JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
+
+               new JSONObject(jsonParams),
+               new Response.Listener<JSONObject>() {
+                   @Override
+                   public void onResponse(JSONObject response) {
+
+                       try {
+                           boolean status = response.getBoolean("status");
+
+                           if (status) {
+                               getIDUser(username);
+                               //Toast.makeText(LoginActivity.this, "" + status, Toast.LENGTH_LONG).show();
+
+                           } else {
+                               AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                               builder.setCancelable(true);
+                               builder.setMessage(R.string.loginerro);
+                               builder.setPositiveButton("OK",
+                                       new DialogInterface.OnClickListener() {
+                                           @Override
+                                           public void onClick(DialogInterface dialog, int which) {
+                                           }
+                                       });
+
+
+                               AlertDialog dialog = builder.create();
+                               dialog.show();
+                              // Toast.makeText(LoginActivity.this, "" + status, Toast.LENGTH_SHORT).show();
+                               id = null;
+
+                           }
+
+
+                       } catch (JSONException ex) {
+                           Log.d("login", "" + ex);
+                       }
+                   }
+               },
+
+               new Response.ErrorListener() {
+                   @Override
+                   public void onErrorResponse(VolleyError error) {
+                       Toast.makeText(LoginActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                   }
+               }) {
+           @Override
+           public Map<String, String> getHeaders() throws AuthFailureError {
+
+               HashMap<String, String> headers = new HashMap<String, String>();
+               headers.put("Content-Type", "application/json; charset=utf-8");
+               headers.put("User-agent", System.getProperty("http.agent"));
+
+               return headers;
+           }
+
+       };
+
+       MySingleton.getInstance(this).addToRequestQueue(postRequest);
+
+   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     public void Registar(String username, String password) {
-        String url = "https://inactive-mosses.000webhostapp.com/myslim/api/users";
+        String url = prefix_url + "/users";
 
         Map<String, String> jsonParams = new HashMap<String, String>();
         jsonParams.put("username", username);
